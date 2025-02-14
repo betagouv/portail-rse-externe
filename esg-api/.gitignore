@@ -4,3 +4,8 @@ notebook/texts_file.csv
 notebook/texts_file.pkl
 .DS_Store
 
+# API : environnement de dev
+esg-api/.venv
+esg-api/.env
+esg-api/.envrc
+
