@@ -1,0 +1,19 @@
+services:
+  flask:
+    build: ./app
+    expose:
+      - "43440"
+    volumes:
+      - model_volume:/app/models
+      - /tmp:/tmp  # Make sure /tmp is accessible for the stats socket
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - flask
+      
+volumes:
+  model_volume:
