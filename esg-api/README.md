@@ -43,6 +43,7 @@ Installation is designed for an **AlmaLinux 9 server** and requires:
   - Docker
   - Docker-compose
   - Nginx
+  - Redis
   - Python 3.11
   - UWSGI
   - Flask
@@ -103,15 +104,24 @@ uwsgitop /tmp/uwsgi-stats.sock
 
 ## 🔗 API Endpoints
 
-| Method | Endpoint        | Description                |
-|--------|-----------------|----------------------------|
-| POST   | `/ping`         | Check API health status    |
-| POST   | `/upload`       | Upload PDF                 |
-| POST   | `/pdf2txt`      | Convert PDF to texts       |
-| GET    | `/gettxtfile`   | Get texts (CSV file)              |
-| POST   | `/esrspredict`  | Predict ESRS from text     |
-| GET    | `/getpredsfile` | Get ESRS predictions (CSV File)       |
-| POST   | `/clean`        | Clean temporary files      |
+### List of end-points
+
+| Method | Endpoint            | Description                |
+|--------|---------------------|----------------------------|
+| POST   | `/ping`             | Check API health status    |
+| POST   | `/upload`           | Upload PDF                 |
+| POST   | `/pdf2txt`          | Convert PDF to texts       |
+| GET    | `/gettxtfile`       | Get texts (CSV file)       |
+| POST   | `/esrspredict`      | Predict ESRS from text     |
+| GET    | `/checkactivetask`  | Check if a task is active  |
+| GET    | `/getnbactivetasks` | Check active task number   |
+| GET    | `/getpredsfile`     | Get ESRS predictions (CSV  |
+| POST   | `/clean`            | Clean temporary files      |
+
+### Explanations of prediction calls
+When calling **/esrspredict**, the API returns **{'status': {'code': 0, 'msg': 'Task started'}}** immediately but the task will run in the background.
+To find out if the task is still running, call **/checkactivetask** with a **pdf_key**.
+If it returns **{'nb_tasks': '0' ..}**, the task is finished and you can get the prediction file using **getpredsfile**. At any time, you can call **getnbactivetasks** to get the number of background tasks. If this number is greater than **NB_PARALLEL_TASKS_IN_API (in api.py)**, **/esrspredict** will return **{'status': {'code': -3, 'msg': 'Too many task : 2 task running'}}** message and you will have to wait for the number of tasks to decrease and retry your prediction call to the API later.
 
 ---
 

@@ -5,8 +5,12 @@ services:
       - "43440"
     volumes:
       - model_volume:/app/models
-      - /tmp:/tmp  # Make sure /tmp is accessible for the stats socket
-
+      - /tmp:/tmp
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
   nginx:
     build: ./nginx
     ports:
@@ -14,6 +18,12 @@ services:
       - "443:443"
     depends_on:
       - flask
-      
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+
 volumes:
   model_volume:
