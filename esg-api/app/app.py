@@ -19,7 +19,9 @@ from functools import wraps
 from pathlib import PosixPath
 import torch
 import fitz
+import redis
 
+from threading import Thread
 from beevibe import BeeMLMClassifier, HuggingFaceHub
 
 # Import custom packages
@@ -48,9 +50,20 @@ MODEL_FILE_PATH = MODEL_PATH+MODEL_NAME
 CURRENT_DEVICE = "cpu"
 MODELS = [] 
 
+# Number of threads
+NB_PARALLEL_TASKS_IN_API = 2  # equal to processes = X in uwsgi.ini
+NB_THREADS_TO_PREDICT = 8 # NB_THREADS_TO_PREDICT * NB_PARALLEL_TASKS_IN_API < nb cores
+
 # Flask API
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # < 100 MB
+
+# Get Redis connection details
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+
+# Connect to Redis inside Docker
+redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
 @app.before_request
 def load_model():
@@ -191,7 +204,7 @@ def ping():
 
 @app.route('/clean', methods = ['GET', 'POST'])
 @pdf_token_required
-def clean(pdf_key, pdf_path):    
+def clean(pdf_key, pdf_path):
 
     status_dict = {"code":0, "msg":"Cleaning done"}
     resp_dict = {"status":status_dict}
@@ -282,18 +295,64 @@ def gettxtfile(pdf_key, pdf_path):
     except FileNotFoundError:
         abort(404)
 
-        
+def predict_in_bg(model, csv_file_path, pd_texts, redis_client, pdf_key):
+    
+    # Get the number of active threads
+    ret = redis_client.get("nb_tasks")
+    if ret is None:
+        nb_tasks=0
+    else:
+        nb_tasks=int(ret)
+
+    # Increase the number of tasks
+    redis_client.set("nb_tasks", str(nb_tasks+1))
+
+    # Set the PDF_KEY
+    ret = redis_client.get(pdf_key)
+    if ret is None:
+        nb_pdf_key=1
+    else:
+        nb_pdf_key=int(ret) + 1
+
+    redis_client.set(pdf_key, str(nb_pdf_key))
+
+    # Get raw texts from file
+    raw_texts = pd_texts.TEXTS.values.tolist()
+
+    # Predict ESRS
+    y_preds = model.predict(raw_texts, batch_size=50, device="cpu")
+
+    # Save predictions to CSV file
+    texts_esrs = [model.labels_names[k] for k in y_preds]
+    pd_texts.loc[:, "ESRS"] = texts_esrs
+    pd_texts.to_csv(csv_file_path, index=False)
+
+    # Decrease the number of tasks
+    ret = redis_client.get("nb_tasks")
+    if ret is None:
+        nb_tasks=0
+    else:
+        nb_tasks = int(ret)
+        redis_client.set("nb_tasks", str(nb_tasks-1))
+
+    # Decrease or delete the PDF_KEY action
+    ret = redis_client.get(pdf_key)
+    if ret is not None:
+        nb_pdf_key=int(ret) - 1
+        if nb_pdf_key == 0:
+            redis_client.delete(pdf_key)
+        else:
+            redis_client.set(pdf_key, str(nb_pdf_key))
+
 @app.route('/esrspredict', methods = ['GET', 'POST'])
 @pdf_token_required
-def esrspredict(pdf_key, pdf_path):
+def esrspredictbg(pdf_key, pdf_path):
     
     status_dict = {"code":0, "msg":"ESRS predicted with success"}
     
     # Get texts csv file from pdf path
     pkl_file_path = str(CURRENT_FULL_PATH)+"/"+str(pdf_path)+"/"+TEXT_FILE_NAME_PKL
     csv_file_path = str(CURRENT_FULL_PATH)+"/"+str(pdf_path)+"/"+PRED_FILE_NAME_CSV
-
-    msg = pkl_file_path
 
     # Check if texts file exist
     if os.path.exists(pkl_file_path):
@@ -305,26 +364,66 @@ def esrspredict(pdf_key, pdf_path):
             # Predict ESRS
             if len(raw_texts) > 0:
 
-                # Set nb cores for multi-threading
-                torch.set_num_threads(12)
+                # Get the number of active threads
+                ret = redis_client.get("nb_tasks")
+                if ret is None:
+                    nb_tasks=0
+                else:
+                    nb_tasks=int(ret)
 
-                # Get model
-                model = MODELS[0]
+                # Max 3 threads in parallel
+                if nb_tasks < NB_PARALLEL_TASKS_IN_API :
 
-                # Predict ESRS
-                y_preds = model.predict(raw_texts, batch_size=50, device="cpu")
+                    # Set nb cores for multi-threading
+                    torch.set_num_threads(NB_THREADS_TO_PREDICT)
 
-                # Save predictions to CSV file
-                texts_esrs = [model.labels_names[k] for k in y_preds]
-                pd_texts.loc[:, "ESRS"] = texts_esrs
-                pd_texts.to_csv(csv_file_path, index=False)
+                    # Get model
+                    model = MODELS[0]
 
+                    # Predict in background
+                    thread = Thread(target=predict_in_bg, args=(model, csv_file_path, pd_texts, redis_client, pdf_key))
+                    thread.start()
+
+                    # Task is started
+                    status_dict = {"code":0, "msg":"Task started"}
+                else:
+                    # Too many tasks running
+                    status_dict = {"code":-3, "msg":f"Too many tasks : {str(nb_tasks)} tasks running"}
             else:
                 status_dict = {"code":-2, "msg":"No texts to predict"}
     else:
-        status_dict = {"code":-1, "msg":msg}  #"Texts must be generated"}
+        status_dict = {"code":-1, "msg":"Texts must be generated"}
     
     resp_dict = {"status":status_dict}
+    return json_response(resp_dict)
+
+@app.route("/getnbactivetasks", methods=["GET"])
+def getnbactivetasks():
+
+    # Get the number of active tasks
+    ret = redis_client.get("nb_tasks")
+    if ret is None:
+        nb_tasks=0
+    else:
+        nb_tasks = int(ret)
+
+    status_dict = {"code":0, "msg":"Number of tasks returned"}
+    resp_dict = {"status":status_dict, "nb_tasks":str(nb_tasks)}
+    return json_response(resp_dict)
+
+@app.route("/checkactivetask", methods=["GET"])
+@pdf_token_required
+def checkactivetask(pdf_key, pdf_path):
+
+    # Get the number of active tasks
+    ret = redis_client.get(pdf_key)
+    if ret is None:
+        task_status = "not active"
+    else:
+        task_status = f"{str(ret)} active"
+    
+    status_dict = {"code":0, "msg":"Task is checked"}
+    resp_dict = {"status":status_dict, "task_status":task_status}
     return json_response(resp_dict)
 
 
