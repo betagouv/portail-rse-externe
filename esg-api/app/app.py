@@ -59,7 +59,6 @@ def load_model():
 
     if not os.path.exists(directory_path):
         # Get HuggingFace token
-        # Needs a ./config.ini with HuggingFace an Token
         # Note: getting out the token from a versionned file and using HF_TOKEN env-var instead
         hf_hub = HuggingFaceHub()
         hf_token = os.getenv("HF_TOKEN")
