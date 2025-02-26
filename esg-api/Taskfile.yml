@@ -1,0 +1,5 @@
+version: '3'
+
+tasks:
+  flask: flask --app app.app run
+

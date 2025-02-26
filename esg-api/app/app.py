@@ -72,8 +72,7 @@ def load_model():
         # Get HuggingFace token
         # Needs a ./config.ini with HuggingFace an Token
         hf_hub = HuggingFaceHub()
-        hf_token = hf_hub.load_hf_token()
-        print("hf_token:", hf_token)
+        hf_token = os.getenv("HF_TOKEN")
 
         # Download model from hub
         hf_hub.load_from_hf_hub(
@@ -181,7 +180,7 @@ def pdf_token_required(f):
 
 
 @app.errorhandler(400)
-def page_not_found(e):
+def page_not_found(_):
     return "bad request!", 400
 
 
