@@ -25,8 +25,7 @@ Paramétrer `HF_TOKEN`
 ### Exécuter flask
 
 ```
-cd app
-uv run -- flask run
+uv run -- flask --app app.app run
 ```
 
 ### Utiliser le notebook
