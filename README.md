@@ -13,21 +13,20 @@ Il est probable qu'il ne soit qu'un espace de travail temporaire pour être ensu
 ### Créer le virtualenv
 
 ```
-python3 -m venv venv
-. ./venv/bin/activate
-pip install -r esg-api/app/requirements.txt
-pip install requests #pour jupyter
+cd esg-api
+uv sync
 ```
 
-### Modifier config.ini
+### Environnement
 
-Sert à paramétrer `token`
+Copier `example.env` dans `esg-api/app/.env`
+Paramétrer `HF_TOKEN`
 
 ### Exécuter flask
 
 ```
-cd esg-api/app
-flask run
+cd app
+uv run -- flask run
 ```
 
 ### Utiliser le notebook
