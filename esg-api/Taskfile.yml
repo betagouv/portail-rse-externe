@@ -1,7 +1,7 @@
 version: '3'
 
 tasks:
-  flask: flask --app app.app run
+  flask: flask --app flask_app.app run
   uwsgi: uwsgi --ini uwsgi.ini --protocol http 
   format: ruff format 
   lint: ruff check 
