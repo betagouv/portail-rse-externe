@@ -1,7 +1,0 @@
-flask
-joblib
-uwsgi
-pandas
-pymupdf==1.25.3
-beevibe==0.1.0
-redis

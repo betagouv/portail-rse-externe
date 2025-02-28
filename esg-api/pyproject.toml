@@ -1,0 +1,22 @@
+[project]
+name = "portail-rse-esg-api"
+version = "0.1.0"
+description = "API connectée au moteur IA"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beevibe==0.1.0",
+    "flask>=3.1.0",
+    "joblib>=1.4.2",
+    "pandas>=2.2.3",
+    "pymupdf==1.25.3",
+    "python-dotenv>=1.0.1",
+    "redis>=5.2.1",
+    "uwsgi>=2.0.28",
+]
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.3.5",
+    "ruff>=0.9.8",
+]
