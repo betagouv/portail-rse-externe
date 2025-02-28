@@ -20,10 +20,10 @@ import pandas as pd
 import torch
 from beevibe import BeeMLMClassifier, HuggingFaceHub
 from flask import Flask, abort, json, make_response, request, send_file
+from werkzeug.utils import secure_filename
 
 # Import custom packages
-from app.librairies.extract import ExtractTexts
-from werkzeug.utils import secure_filename
+from helpers.extract import ExtractTexts
 
 # Current full path and xpdf path
 CURRENT_FULL_PATH = os.getcwd()
