@@ -39,8 +39,7 @@ REPO_NAME = "Franbul/" + MODEL_NAME
 
 # Workspace directory
 WS_PATH = "./workspace"
-if not os.path.exists(WS_PATH):
-    os.makedirs(WS_PATH)
+os.makedirs(WS_PATH, exist_ok=True)
 
 # Load trained model
 MODEL_PATH = "./models/"
