@@ -1,8 +1,10 @@
 version: '3'
 
 tasks:
-  flask: flask --app flask_app.app run
+  flask: flask --app flask_app.app run --reload --debug
   uwsgi: uwsgi --ini uwsgi.ini --protocol http 
   format: ruff format 
   lint: ruff check 
   fix: ruff check --fix
+  celery: celery -A flask_app.celery worker --loglevel=info
+  dev: honcho start --procfile Procfile.dev
