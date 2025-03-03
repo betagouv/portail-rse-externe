@@ -16,62 +16,28 @@ from functools import wraps
 from pathlib import PosixPath
 
 import fitz
-import pandas as pd
-import torch
-from beevibe import BeeMLMClassifier, HuggingFaceHub
-from flask import Flask, abort, json, make_response, request, send_file
+from flask import abort, json, make_response, request, send_file
 from werkzeug.utils import secure_filename
 
 # Import custom packages
+import flask_app.tasks as tasks
 from helpers.extract import ExtractTexts
 
-# Current full path and xpdf path
-CURRENT_FULL_PATH = os.getcwd()
 
-# File names
-TEXT_FILE_NAME_PKL = "texts_file.pkl"
-TEXT_FILE_NAME_CSV = "texts_file.csv"
-PRED_FILE_NAME_CSV = "esrs_preds.csv"
+from flask_app import init_flask_app
 
-# HuggingFace model name and repo name
-MODEL_NAME = "distill-camembert-esrs-v1"
-REPO_NAME = "Franbul/" + MODEL_NAME
+# voir :__init__.py
+from flask_app import (
+    CURRENT_FULL_PATH,
+    PRED_FILE_NAME_CSV,
+    WS_PATH,
+    TEXT_FILE_NAME_CSV,
+    TEXT_FILE_NAME_PKL,
+)
 
-# Workspace directory
-WS_PATH = "./workspace"
-os.makedirs(WS_PATH, exist_ok=True)
-
-# Load trained model
-MODEL_PATH = "./models/"
-MODEL_FILE_PATH = MODEL_PATH + MODEL_NAME
-CURRENT_DEVICE = "cpu"
-MODELS = []
 
 # Flask API
-app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # < 100 MB
-
-
-@app.before_request
-def load_model():
-    directory_path = str(CURRENT_FULL_PATH) + "/" + MODEL_FILE_PATH
-
-    if not os.path.exists(directory_path):
-        # Get HuggingFace token
-        # Note: getting out the token from a versionned file and using HF_TOKEN env-var instead
-        hf_hub = HuggingFaceHub()
-        hf_token = os.getenv("HF_TOKEN")
-
-        # Download model from hub
-        hf_hub.load_from_hf_hub(
-            directory_path=directory_path, repo_name=REPO_NAME, token=hf_token
-        )
-
-    # Load Model in memory
-    model = BeeMLMClassifier.load_model_safetensors(MODEL_FILE_PATH)
-
-    # Add model to the list (only 1 model here)
-    MODELS.append(model)
+app = init_flask_app()
 
 
 # jsonify API responses
@@ -288,47 +254,8 @@ def gettxtfile(pdf_key, pdf_path):
 @app.route("/esrspredict", methods=["GET", "POST"])
 @pdf_token_required
 def esrspredict(pdf_key, pdf_path):
-    status_dict = {"code": 0, "msg": "ESRS predicted with success"}
-
-    # Get texts csv file from pdf path
-    pkl_file_path = (
-        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + TEXT_FILE_NAME_PKL
-    )
-    csv_file_path = (
-        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_CSV
-    )
-
-    msg = pkl_file_path
-
-    # Check if texts file exist
-    if os.path.exists(pkl_file_path):
-        # Open texts file
-        pd_texts = pd.read_pickle(pkl_file_path)
-        raw_texts = pd_texts.TEXTS.values.tolist()
-
-        # Predict ESRS
-        if len(raw_texts) > 0:
-            # Set nb cores for multi-threading
-            torch.set_num_threads(12)
-
-            # Get model
-            model = MODELS[0]
-
-            # Predict ESRS
-            y_preds = model.predict(raw_texts, batch_size=50, device="cpu")
-
-            # Save predictions to CSV file
-            texts_esrs = [model.labels_names[k] for k in y_preds]
-            pd_texts.loc[:, "ESRS"] = texts_esrs
-            pd_texts.to_csv(csv_file_path, index=False)
-
-        else:
-            status_dict = {"code": -2, "msg": "No texts to predict"}
-    else:
-        status_dict = {"code": -1, "msg": msg}  # "Texts must be generated"}
-
-    resp_dict = {"status": status_dict}
-    return json_response(resp_dict)
+    tasks.esrspredict.delay(pdf_key, pdf_path)
+    return json_response(dict(ok=True, msg=f"analyse en cours: {pdf_key}"))
 
 
 @app.route("/getpredsfile", methods=["GET", "POST"])
@@ -346,6 +273,7 @@ def getpredsfile(pdf_key, pdf_path):
         abort(404)
 
 
+# Note: que se passe t'il si une prédiction est en cours ?
 @app.route("/cleanall", methods=["GET", "POST"])
 def clean_all():
     # Delete bert directory and temporary files
@@ -360,6 +288,7 @@ def clean_all():
     return json_response(resp_dict)
 
 
+# Note : cette route ne devrait plus être utilisée
 @app.route("/upload", methods=["POST"])
 def upload():
     # Create a key directory for th pdf file
@@ -397,7 +326,3 @@ def upload():
         resp_dict = {"status": status_dict}
 
     return json_response(resp_dict)
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=43440)
