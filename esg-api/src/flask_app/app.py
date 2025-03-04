@@ -16,6 +16,7 @@ from functools import wraps
 from pathlib import PosixPath
 
 import fitz
+import requests
 from flask import abort, json, make_response, request, send_file
 from werkzeug.utils import secure_filename
 
@@ -326,3 +327,15 @@ def upload():
         resp_dict = {"status": status_dict}
 
     return json_response(resp_dict)
+
+@app.route("/run-task", methods=["POST"])
+def run_task():
+    document_id = request.form["document_id"]
+    s3_url = request.form["url"]
+    print({"x": document_id, "y": s3_url})
+    response = requests.get(s3_url)
+    pdf_path = f"{WS_PATH}/pdf_{document_id}.pdf"
+    with open(pdf_path, "wb") as f:
+        f.write(response.content)
+    tasks.esrspredict.delay(document_id, pdf_path)
+    return json_response({"status": "en attente"})
