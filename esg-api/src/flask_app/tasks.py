@@ -94,4 +94,4 @@ def esrspredict(pdf_key, pdf_path):
     logger.info(f"fin d'analyse pour {pdf_key} : {status_dict}")
 
     url = f"{APP_BASE_URL}/ESRS-predict/{pdf_key}"
-    requests.get(url, {"status": "analyse en cours"})
+    requests.post(url, {"status": "analyse en cours"})

@@ -332,7 +332,6 @@ def upload():
 def run_task():
     document_id = request.form["document_id"]
     s3_url = request.form["url"]
-    print({"x": document_id, "y": s3_url})
     response = requests.get(s3_url)
     pdf_path = f"{WS_PATH}/pdf_{document_id}.pdf"
     with open(pdf_path, "wb") as f:
