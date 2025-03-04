@@ -2,6 +2,7 @@ import logging
 import os
 
 import pandas as pd
+import requests
 import torch
 from beevibe import BeeMLMClassifier, HuggingFaceHub
 from celery import shared_task
@@ -20,6 +21,8 @@ celery = flask_app.extensions["celery"]
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+APP_BASE_URL = os.getenv("APP_BASE_URL")
 
 
 def init_model():
@@ -90,4 +93,5 @@ def esrspredict(pdf_key, pdf_path):
 
     logger.info(f"fin d'analyse pour {pdf_key} : {status_dict}")
 
-    # TODO: notifier de la fin du traitement par callback
+    url = f"{APP_BASE_URL}/ESRS-predict/{pdf_key}"
+    requests.get(url, {"status": "analyse en cours"})

@@ -30,6 +30,7 @@ Paramétrer les variables suivantes :
 - `CELERY_BROKER_URL` : endpoint du broker Celery (par défaut : instance Redis locale)
 - `CELERY_RESULT_BACKEND` : endpoint pour les tâches Celery (par défaut : instance Redis locale)
 - `PYTHONPATH` : inclure le dossier `src` comme indiqué dans le fichier d'exemple pour modifier le chemin système de Python
+- `APP_BASE_URL` : le domaine de l'app django (préfixé par le protocole)
 
 
 ### Exécuter Flask
