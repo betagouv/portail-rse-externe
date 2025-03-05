@@ -18,6 +18,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "flower>=2.0.1",
     "honcho>=2.0.0",
     "jupyterlab>=4.3.5",
     "ruff>=0.9.8",
