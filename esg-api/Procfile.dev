@@ -5,3 +5,4 @@ web: flask --app flask_app.app run --reload --debug
 # --pool=threads, pour pouvoir utiliser les workers dans des threads (autorise plusieurs tâches)
 # --pool=solo permet de ne gérér qu'une tâche simultanément, ok pour un poste de dev
 worker: celery -A flask_app.tasks worker --pool=solo --loglevel=info
+flower: celery -A flask_app.tasks flower
