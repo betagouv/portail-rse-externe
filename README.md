@@ -17,15 +17,33 @@ cd esg-api
 uv sync
 ```
 
+### Installer Taskfile 
+
+Voir : [Taskfile](https://taskfile.dev) :
+
 ### Environnement
 
-Copier `example.env` dans `esg-api/app/.env`
-Paramétrer `HF_TOKEN`
+Modifier et copier `example.env` dans `esg-api/.env`
 
-### Exécuter flask
+Paramétrer les variables suivantes :
+- `HF_TOKEN` : token d'accès au dépôt du modèle de prédiction sur HuggingFace
+- `CELERY_BROKER_URL` : endpoint du broker Celery (par défaut : instance Redis locale)
+- `CELERY_RESULT_BACKEND` : endpoint pour les tâches Celery (par défaut : instance Redis locale)
+- `PYTHONPATH` : inclure le dossier `src` comme indiqué dans le fichier d'exemple pour modifier le chemin système de Python
+- `APP_BASE_URL` : le domaine de l'app django (préfixé par le protocole)
 
+
+### Exécuter Flask
+
+``` 
+task flask
+``` 
+
+### Exécuter Flask et les workers Celery 
+
+Execute à la fois les commandes de lancement des workers Celery et de l'application Flask via Honcho. 
 ```
-uv run -- flask --app app.app run
+task dev
 ```
 
 ### Utiliser le notebook

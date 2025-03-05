@@ -30,6 +30,28 @@ def api_status():
     except requests.exceptions.RequestException as err:
         print(err)
 
+def run_task():
+    """traitement de l'ensemble des tâches"""
+    try:
+        t0 = time.time()
+        url = f"{API_URL}/run-task"
+
+        response = requests.post(url, {"file_id": 23, "url": "S3_URL"})
+
+        resp_dict = response.json()
+        data = response.json()
+        data["status_code"] = response.status_code
+        return data
+
+    except requests.exceptions.HTTPError as errh:
+        print("1", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("2", errc)
+    except requests.exceptions.Timeout as errt:
+        print("3", errt)
+    except requests.exceptions.RequestException as err:
+        print("4", err)
+
 
 def post_pdf(pdf_path):
     """etape 1 du traitement"""
