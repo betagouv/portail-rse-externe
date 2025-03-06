@@ -333,8 +333,10 @@ def run_task():
     document_id = request.form["document_id"]
     s3_url = request.form["url"]
     response = requests.get(s3_url)
-    pdf_path = f"{WS_PATH}/pdf_{document_id}.pdf"
-    with open(pdf_path, "wb") as f:
+    pdf_path = f"{WS_PATH}/document_{document_id}"
+    os.makedirs(pdf_path, exist_ok=True)
+    file_path = f"{pdf_path}/fichier.pdf"
+    with open(file_path, "wb") as f:
         f.write(response.content)
-    tasks.esrspredict.delay(document_id, pdf_path)
+    tasks.analyser.delay(document_id, pdf_path)
     return json_response({"status": "en attente"})
