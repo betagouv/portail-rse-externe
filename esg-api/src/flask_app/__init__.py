@@ -10,7 +10,7 @@ CURRENT_FULL_PATH = os.getcwd()
 # File names
 TEXT_FILE_NAME_PKL = "texts_file.pkl"
 TEXT_FILE_NAME_CSV = "texts_file.csv"
-PRED_FILE_NAME_CSV = "esrs_preds.csv"
+PRED_FILE_NAME_JSON = "esrs_preds.json"
 
 # HuggingFace model name and repo name
 MODEL_NAME = "distill-camembert-esrs-v1"
@@ -26,6 +26,8 @@ MODEL_FILE_PATH = MODEL_PATH + MODEL_NAME
 CURRENT_DEVICE = "cpu"
 MODELS = []
 
+# Endpoint de l'application Portail RSE 
+APP_BASE_URL = os.getenv("APP_BASE_URL")
 
 # Flask & Celery
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # < 100 MB

@@ -6,5 +6,5 @@ tasks:
   format: ruff format 
   lint: ruff check 
   fix: ruff check --fix
-  celery: celery -A flask_app.tasks worker --loglevel=info
+  celery: celery -A flask_app.tasks worker --loglevel=info --pool=threads
   dev: honcho start --procfile Procfile.dev
