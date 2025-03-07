@@ -12,7 +12,7 @@ from celery import shared_task
 from flask_app import (
     CURRENT_FULL_PATH,
     MODEL_FILE_PATH,
-    PRED_FILE_NAME_CSV,
+    PRED_FILE_NAME_JSON,
     REPO_NAME,
     TEXT_FILE_NAME_CSV,
     TEXT_FILE_NAME_PKL,
@@ -154,8 +154,8 @@ def esrspredict(pdf_key, pdf_path) -> dict:
     pkl_file_path = (
         str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + TEXT_FILE_NAME_PKL
     )
-    csv_file_path = (
-        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_CSV
+    json_file_path = (
+        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_JSON
     )
 
     msg = pkl_file_path
@@ -181,7 +181,7 @@ def esrspredict(pdf_key, pdf_path) -> dict:
             # Save predictions to CSV file
             texts_esrs = [model.labels_names[k] for k in y_preds]
             pd_texts.loc[:, "ESRS"] = texts_esrs
-            pd_texts.to_csv(csv_file_path, index=False)
+            pd_texts.to_json(json_file_path, index=False)
 
         else:
             msg = "Pas de texte à analyser"
@@ -193,7 +193,7 @@ def esrspredict(pdf_key, pdf_path) -> dict:
 
 def sendpredsfile(pdf_key, pdf_path) -> dict:
     csv_file_path = (
-        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_CSV
+        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_JSON
     )
 
     with open(csv_file_path) as f:
@@ -201,8 +201,7 @@ def sendpredsfile(pdf_key, pdf_path) -> dict:
 
     logger.info(f"fin sendpredsfile pour {pdf_key}")
 
-    # TODO : JSON
-    return make_status(pdf_key, "success", resultat_csv=content)
+    return make_status(pdf_key, "success", resultat_json=content)
 
 
 @shared_task(ignore_result=False)
