@@ -29,7 +29,7 @@ from flask_app import init_flask_app
 # voir :__init__.py
 from flask_app import (
     CURRENT_FULL_PATH,
-    PRED_FILE_NAME_CSV,
+    PRED_FILE_NAME_JSON,
     WS_PATH,
     TEXT_FILE_NAME_CSV,
     TEXT_FILE_NAME_PKL,
@@ -267,7 +267,7 @@ def esrspredict(pdf_key, pdf_path):
 def getpredsfile(pdf_key, pdf_path):
     # Get texts csv file from pdf path
     csv_file_path = (
-        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_CSV
+        str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_JSON
     )
 
     try:
