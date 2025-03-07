@@ -16,7 +16,6 @@ from functools import wraps
 from pathlib import PosixPath
 
 import fitz
-import requests
 from flask import abort, json, make_response, request, send_file
 from werkzeug.utils import secure_filename
 
@@ -36,9 +35,13 @@ from flask_app import (
     TEXT_FILE_NAME_PKL,
 )
 
+import requests
+import logging
+
 
 # Flask API
 app = init_flask_app()
+logger = logging.getLogger(__name__)
 
 
 # jsonify API responses
@@ -328,15 +331,25 @@ def upload():
 
     return json_response(resp_dict)
 
+
 @app.route("/run-task", methods=["POST"])
 def run_task():
-    document_id = request.form["document_id"]
-    s3_url = request.form["url"]
-    response = requests.get(s3_url)
-    pdf_path = f"{WS_PATH}/document_{document_id}"
-    os.makedirs(pdf_path, exist_ok=True)
-    file_path = f"{pdf_path}/fichier.pdf"
-    with open(file_path, "wb") as f:
-        f.write(response.content)
-    tasks.analyser.delay(document_id, pdf_path)
-    return json_response({"status": "en attente"})
+    logger.info("params:", request.form)
+    try:
+        document_id = request.form["document_id"]
+        s3_url = request.form["url"]
+        response = requests.get(s3_url)
+        pdf_path = f"{WS_PATH}/document_{document_id}"
+        os.makedirs(pdf_path, exist_ok=True)
+        file_path = f"{pdf_path}/fichier.pdf"
+
+        with open(file_path, "wb") as f:
+            f.write(response.content)
+    except Exception as ex:
+        logger.exception(ex)
+        return json_response({"status": "error", "msg": str(ex)})
+    else:
+        # à ce point, les erreurs sont gérées par la tâche Celery
+        tasks.analyser.delay(document_id, pdf_path)
+
+        return json_response({"status": "en attente"})
