@@ -7,6 +7,8 @@ requires-python = ">=3.12"
 dependencies = [
     "beevibe==0.1.0",
     "celery>=5.4.0",
+    "click>=8.1.8",
+    "flask-jwt-extended>=4.7.1",
     "flask>=3.1.0",
     "joblib>=1.4.2",
     "pandas>=2.2.3",
