@@ -181,7 +181,7 @@ def esrspredict(pdf_key, pdf_path) -> dict:
             # Save predictions to CSV file
             texts_esrs = [model.labels_names[k] for k in y_preds]
             pd_texts.loc[:, "ESRS"] = texts_esrs
-            pd_texts.to_json(json_file_path, index=False)
+            pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(lambda x: x.to_dict(orient='records')).to_json(json_file_path)
 
         else:
             msg = "Pas de texte à analyser"
