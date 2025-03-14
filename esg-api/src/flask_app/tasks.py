@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import PosixPath
 import functools
+import shutil
 
 import pandas as pd
 import requests
@@ -34,9 +35,9 @@ def make_status(document_id: str, status: str, **kwargs) -> dict:
 
 
 def notify_app(status: dict):
-    # appelle l'URL de callbach avec le statut d'avancewment actuel
+    # appelle l'URL de callbach avec le statut d'avancement actuel
     callback_url = f"{APP_BASE_URL}/ESRS-predict/{status['document_id']}"
-    requests.post(callback_url, status)
+    return requests.post(callback_url, status)
 
 
 def init_model():
@@ -72,6 +73,15 @@ def celery_exception_handler(task_func):
             raise
 
     return _inner
+
+
+def remove_directory(target):
+    # suppression des fichiers de travail
+    try:
+        shutil.rmtree(target)
+        logger.info(f"Répertoire {target} supprimé avec succès.")
+    except Exception as e:
+        logger.error(f"Erreur lors de la suppression du répertoire {target}: {e}")
 
 
 def pdf2txt(pdf_key, pdf_path) -> dict:
@@ -181,7 +191,9 @@ def esrspredict(pdf_key, pdf_path) -> dict:
             # Save predictions to CSV file
             texts_esrs = [model.labels_names[k] for k in y_preds]
             pd_texts.loc[:, "ESRS"] = texts_esrs
-            pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(lambda x: x.to_dict(orient='records')).to_json(json_file_path)
+            pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(
+                lambda x: x.to_dict(orient="records")
+            ).to_json(json_file_path)
 
         else:
             msg = "Pas de texte à analyser"
@@ -217,5 +229,8 @@ def analyser(document_id, pdf_path):
 
     logger.info(f"envoi des résultats : document:{document_id}, path={pdf_path}")
     notify_app(sendpredsfile(document_id, pdf_path))
+
+    # A ce point, si pas d'erreur, on peut supprimer le dossier de travail
+    remove_directory(pdf_path)
 
     logger.info(f"fin de traitement pour le fichier {document_id} ({pdf_path})")
