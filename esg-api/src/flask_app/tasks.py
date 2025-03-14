@@ -243,20 +243,18 @@ def sendpredsfile(pdf_key, pdf_path) -> dict:
 def analyser(document_id, pdf_path):
     notify_app(make_status(document_id, "processing"))
 
-    logger.info(f"vérification du pdf : document:{document_id}, path={pdf_path}")
-    notification = check_pdf_in_path(document_id, pdf_path)
-    notify_app(notification)
-    if notification["status"] == "error":
-        logger.info(f"erreur, arrêt du traitement pour {document_id}")
-        return
-
-    logger.info(f"conversion en texte : document:{document_id}, path={pdf_path}")
-    notify_app(pdf2txt(document_id, pdf_path))
-
-    logger.info(f"lancement de l'analyse : document:{document_id}, path={pdf_path}")
-    notify_app(esrspredict(document_id, pdf_path))
-
-    logger.info(f"envoi des résultats : document:{document_id}, path={pdf_path}")
-    notify_app(sendpredsfile(document_id, pdf_path))
+    STEPS = [
+        ["vérification du pdf", check_pdf_in_path],
+        ["conversion en texte", pdf2txt],
+        ["lancement de l'analyse", esrspredict],
+        ["envoi des résultats", sendpredsfile],
+    ]
+    for step_label, function in STEPS:
+        logger.info(f"{step_label} : document:{document_id}, path={pdf_path}")
+        notification = function(document_id, pdf_path)
+        notify_app(notification)
+        if notification["status"] == "error":
+            logger.info(f"erreur, arrêt du traitement pour {document_id}")
+            return
 
     logger.info(f"fin de traitement pour le fichier {document_id} ({pdf_path})")
