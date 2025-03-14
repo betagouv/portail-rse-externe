@@ -164,7 +164,7 @@ def pdf2txt(pdf_key, pdf_path) -> dict:
             # Return OK and the number of texts
             nbtexts = pd_res_filter.shape[0]
     except Exception as e:
-        msg = f"erreur de traitement lors du passage de PDF a TXT : {e}"
+        msg = f"erreur de traitement lors du passage de PDF à TXT : {e}"
         logger.exception(msg)
         return make_status(
             pdf_key,
@@ -175,7 +175,7 @@ def pdf2txt(pdf_key, pdf_path) -> dict:
     logger.info(f"fin pdf2txt pour {pdf_key}")
 
     return make_status(
-        pdf_key, "text_processed", msg=f"{nbtexts} trouvé(s) dans le PDF"
+        pdf_key, "text_processed", msg=f"{nbtexts} phrases trouvée(s) dans le PDF"
     )
 
 
