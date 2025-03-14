@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import PosixPath
 import functools
+import shutil
 
 import fitz
 import pandas as pd
@@ -35,9 +36,9 @@ def make_status(document_id: str, status: str, **kwargs) -> dict:
 
 
 def notify_app(status: dict):
-    # appelle l'URL de callbach avec le statut d'avancewment actuel
+    # appelle l'URL de callbach avec le statut d'avancement actuel
     callback_url = f"{APP_BASE_URL}/ESRS-predict/{status['document_id']}"
-    requests.post(callback_url, status)
+    return requests.post(callback_url, status)
 
 
 def init_model():
@@ -75,37 +76,13 @@ def celery_exception_handler(task_func):
     return _inner
 
 
-# Check if a file is a pdf
-def check_pdf_in_path(pdf_key, pdf_path) -> dict:
-    PDFs_DIR = PosixPath(pdf_path)
-    pdfs = list(PDFs_DIR.glob("*.pdf"))
-
-    if len(pdfs) == 1:
-        # Check .pdf File is not a PDF
-        try:
-            # Attempt to open the file
-            doc = fitz.open(pdfs[0])
-
-            # Check the PDF page count
-            if doc.page_count > 0:
-                status = "processing"
-                msg = "Fichier pdf correct"
-            else:
-                status = "error"
-                msg = "Le fichier .pdf n'est pas un PDF"
-        except Exception:
-            status = "error"
-            msg = "Le fichier .pdf n'est pas un PDF"
-    else:
-        # Too many .pdf files found
-        status = "error"
-        msg = "Plusieurs fichiers .pdf trouvés"
-
-    return make_status(
-        pdf_key,
-        status,
-        msg=msg,
-    )
+def remove_directory(target):
+    # suppression des fichiers de travail
+    try:
+        shutil.rmtree(target)
+        logger.info(f"Répertoire {target} supprimé avec succès.")
+    except Exception as e:
+        logger.error(f"Erreur lors de la suppression du répertoire {target}: {e}")
 
 
 def pdf2txt(pdf_key, pdf_path) -> dict:
@@ -216,7 +193,9 @@ def esrspredict(pdf_key, pdf_path) -> dict:
             # Save predictions to CSV file
             texts_esrs = [model.labels_names[k] for k in y_preds]
             pd_texts.loc[:, "ESRS"] = texts_esrs
-            pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(lambda x: x.to_dict(orient='records')).to_json(json_file_path)
+            pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(
+                lambda x: x.to_dict(orient="records")
+            ).to_json(json_file_path)
 
         else:
             msg = "Aucune phrase n’a été détectée pour l’analyse"
@@ -257,5 +236,8 @@ def analyser(document_id, pdf_path):
         if notification["status"] == "error":
             logger.info(f"erreur, arrêt du traitement pour {document_id}")
             return
+
+    # A ce point, si pas d'erreur, on peut supprimer le dossier de travail
+    remove_directory(pdf_path)
 
     logger.info(f"fin de traitement pour le fichier {document_id} ({pdf_path})")
