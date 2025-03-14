@@ -3,6 +3,7 @@ import os
 from pathlib import PosixPath
 import functools
 
+import fitz
 import pandas as pd
 import requests
 import torch
@@ -72,6 +73,39 @@ def celery_exception_handler(task_func):
             raise
 
     return _inner
+
+
+# Check if a file is a pdf
+def check_pdf_in_path(pdf_key, pdf_path) -> dict:
+    PDFs_DIR = PosixPath(pdf_path)
+    pdfs = list(PDFs_DIR.glob("*.pdf"))
+
+    if len(pdfs) == 1:
+        # Check .pdf File is not a PDF
+        try:
+            # Attempt to open the file
+            doc = fitz.open(pdfs[0])
+
+            # Check the PDF page count
+            if doc.page_count > 0:
+                status = "processing"
+                msg = "Fichier pdf correct"
+            else:
+                status = "error"
+                msg = "Le fichier .pdf n'est pas un PDF"
+        except Exception:
+            status = "error"
+            msg = "Le fichier .pdf n'est pas un PDF"
+    else:
+        # Too many .pdf files found
+        status = "error"
+        msg = "Plusieurs fichiers .pdf trouvés"
+
+    return make_status(
+        pdf_key,
+        status,
+        msg=msg,
+    )
 
 
 def pdf2txt(pdf_key, pdf_path) -> dict:
@@ -208,6 +242,13 @@ def sendpredsfile(pdf_key, pdf_path) -> dict:
 @celery_exception_handler
 def analyser(document_id, pdf_path):
     notify_app(make_status(document_id, "processing"))
+
+    logger.info(f"vérification du pdf : document:{document_id}, path={pdf_path}")
+    notification = check_pdf_in_path(document_id, pdf_path)
+    notify_app(notification)
+    if notification["status"] == "error":
+        logger.info(f"erreur, arrêt du traitement pour {document_id}")
+        return
 
     logger.info(f"conversion en texte : document:{document_id}, path={pdf_path}")
     notify_app(pdf2txt(document_id, pdf_path))
