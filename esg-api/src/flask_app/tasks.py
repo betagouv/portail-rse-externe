@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import PosixPath
 import functools
+import shutil
 
 import fitz
 import pandas as pd
@@ -255,6 +256,10 @@ def analyser(document_id, pdf_path):
         notify_app(notification)
         if notification["status"] == "error":
             logger.info(f"erreur, arrêt du traitement pour {document_id}")
-            return
+            break
+
+    logger.info(f"début suppression des fichiers : document:{document_id}, path={pdf_path}")
+    shutil.rmtree(pdf_path)
+    logger.info(f"fin suppression des fichiers : document:{document_id}, path={pdf_path}")
 
     logger.info(f"fin de traitement pour le fichier {document_id} ({pdf_path})")
