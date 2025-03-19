@@ -1,2 +1,2 @@
-web: flask --app flask_app.app run --host=0.0.0.0 --port=5000
+web: gunicorn --workers=4 --bind=0.0.0.0:44444 flask_app.app:app
 worker: celery -A flask_app.tasks worker --pool=solo --loglevel=info
