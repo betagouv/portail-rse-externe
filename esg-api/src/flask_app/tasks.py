@@ -46,20 +46,19 @@ def init_model():
     directory_path = str(CURRENT_FULL_PATH) + "/" + MODEL_FILE_PATH
 
     if not os.path.exists(directory_path):
-        # Get HuggingFace token
-        # Note: getting out the token from a versionned file using and HF_TOKEN env-var instead
+        # récupération du jeton HuggingFace
+        # Note: plus sûr d'utiliser HF_TOKEN qu'un fichier de configuration
         hf_hub = HuggingFaceHub()
         hf_token = os.getenv("HF_TOKEN")
 
-        # Download model from hub
         hf_hub.load_from_hf_hub(
-            directory_path=directory_path, repo_name=REPO_NAME, token=hf_token
+            directory_path=directory_path,
+            repo_name=REPO_NAME,
+            token=hf_token,
         )
 
-    # Load Model in memory
     model = BeeMLMClassifier.load_model_safetensors(MODEL_FILE_PATH)
 
-    # Add model to the list (only 1 model here)
     return model
 
 
@@ -85,22 +84,45 @@ def remove_directory(target):
         logger.error(f"Erreur lors de la suppression du répertoire {target}: {e}")
 
 
-def pdf2txt(pdf_key, pdf_path) -> dict:
-    # Paths to PDF file
+def check_pdf_in_path(pdf_key, pdf_path) -> dict:
     PDFs_DIR = PosixPath(pdf_path)
     pdfs = list(PDFs_DIR.glob("*.pdf"))
+
+    if len(pdfs) == 1:
+        try:
+            doc = fitz.open(pdfs[0])
+
+            if doc.page_count > 0:
+                status = "processing"
+                msg = "Fichier pdf correct"
+            else:
+                status = "error"
+                msg = "Le fichier .pdf n'est pas un PDF"
+        except Exception:
+            status = "error"
+            msg = "Le fichier .pdf n'est pas un PDF"
+    else:
+        status = "error"
+        msg = "Plusieurs fichiers .pdf trouvés"
+
+    return make_status(
+        pdf_key,
+        status,
+        msg=msg,
+    )
+
+
+def pdf2txt(pdf_key, pdf_path) -> dict:
+    pdf_files_dir = PosixPath(pdf_path)
+    pdfs = list(pdf_files_dir.glob("*.pdf"))
     pdf = pdfs[0]
     nbtexts = 0
-
-    # Path to texts files
     file_path = str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/"
-
-    # Path to the token directory
-    PDF_FILE_PATH = str(CURRENT_FULL_PATH) + "/" + str(pdf)
+    pdf_file_path = str(CURRENT_FULL_PATH) + "/" + str(pdf)
 
     try:
         # Create extractor
-        es = ExtractTexts(PDF_FILE_PATH)  # , 10, 30)
+        es = ExtractTexts(pdf_file_path)  # , 10, 30)
 
         # Run extractor
         pd_res = es.process()
@@ -172,25 +194,17 @@ def esrspredict(pdf_key, pdf_path) -> dict:
 
     msg = pkl_file_path
 
-    # Check if texts file exist
     if os.path.exists(pkl_file_path):
-        # Open texts file
         pd_texts = pd.read_pickle(pkl_file_path)
         raw_texts = pd_texts.TEXTS.values.tolist()
 
-        # Predict ESRS
         if len(raw_texts) > 0:
-            # Set nb cores for multi-threading
+            # TODO: nb de coeurs pour la prediction, à ajuster dynamiquement ? 
             torch.set_num_threads(12)
-
-            # Get model
-            # model = MODELS[0]
             model = init_model()
 
-            # Predict ESRS
             y_preds = model.predict(raw_texts, batch_size=50, device="cpu")
 
-            # Save predictions to CSV file
             texts_esrs = [model.labels_names[k] for k in y_preds]
             pd_texts.loc[:, "ESRS"] = texts_esrs
             pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(
