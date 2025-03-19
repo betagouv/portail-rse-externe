@@ -38,7 +38,15 @@ def make_status(document_id: str, status: str, **kwargs) -> dict:
 def notify_app(status: dict):
     # appelle l'URL de callbach avec le statut d'avancement actuel
     callback_url = f"{APP_BASE_URL}/ESRS-predict/{status['document_id']}"
-    return requests.post(callback_url, status)
+    
+    logger.debug(f"URL de notification : {callback_url}")
+    logger.debug(f"contenu de la notification : {status}")
+
+    result = requests.post(callback_url, status)
+
+    logger.debug(f"resultat callback : {result}")
+    
+    return result
 
 
 def init_model():
@@ -192,7 +200,7 @@ def esrspredict(pdf_key, pdf_path) -> dict:
         str(CURRENT_FULL_PATH) + "/" + str(pdf_path) + "/" + PRED_FILE_NAME_JSON
     )
 
-    msg = pkl_file_path
+    msg = "Fin d'analyse"
 
     if os.path.exists(pkl_file_path):
         pd_texts = pd.read_pickle(pkl_file_path)
@@ -214,7 +222,7 @@ def esrspredict(pdf_key, pdf_path) -> dict:
         else:
             msg = "Aucune phrase n’a été détectée pour l’analyse"
 
-    logger.info(f"fin d'analyse pour {pdf_key}")
+    logger.info(f"fin d'analyse pour ID #{pdf_key}")
 
     return make_status(pdf_key, status="analysis_complete", msg=msg)
 

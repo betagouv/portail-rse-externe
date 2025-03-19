@@ -50,7 +50,7 @@ def ping():
 
 
 @app.route("/run-task", methods=["POST"])
-@jwt_required()
+@jwt_required(skip_revocation_check=True, verify_type=False)
 def run_task():
     logger.info("params:", request.form)
     try:
