@@ -164,12 +164,13 @@ def pdf2txt(pdf_key, pdf_path) -> dict:
             # Return OK and the number of texts
             nbtexts = pd_res_filter.shape[0]
     except Exception as e:
-        msg = f"erreur de traitement lors du passage de PDF à TXT : {e}"
+        msg_utilisateur = "Erreur lors de l’extraction des phrases à analyser"
+        msg = f"{msg_utilisateur} : {e}"
         logger.exception(msg)
         return make_status(
             pdf_key,
             "error",
-            msg=msg,
+            msg=msg_utilisateur,
         )
 
     logger.info(f"fin pdf2txt pour {pdf_key}")
@@ -218,7 +219,7 @@ def esrspredict(pdf_key, pdf_path) -> dict:
             pd_texts.groupby("ESRS")[["PAGES", "TEXTS"]].apply(lambda x: x.to_dict(orient='records')).to_json(json_file_path)
 
         else:
-            msg = "Pas de texte à analyser"
+            msg = "Aucune phrase n’a été détectée pour l’analyse"
 
     logger.info(f"fin d'analyse pour {pdf_key}")
 
