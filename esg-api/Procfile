@@ -1,0 +1,2 @@
+web: gunicorn --workers=4 --bind=0.0.0.0:44444 flask_app.app:app
+worker: celery -A flask_app.tasks worker --pool=solo --loglevel=info

@@ -1,0 +1,9 @@
+{
+	email contact@portail-rse.beta.gouv.fr
+	acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+ia.portail-rse.beta.gouv.fr {
+	log stdout
+	reverse_proxy flask:44444
+}

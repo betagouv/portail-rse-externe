@@ -26,8 +26,11 @@ MODEL_FILE_PATH = MODEL_PATH + MODEL_NAME
 CURRENT_DEVICE = "cpu"
 MODELS = []
 
-# Endpoint de l'application Portail RSE 
+# Endpoint de l'application Portail RSE
 APP_BASE_URL = os.getenv("APP_BASE_URL")
+
+# Pour la gestion des tokens JWT
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 # Flask & Celery
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # < 100 MB
@@ -60,6 +63,7 @@ def init_celery_app(flask_app: Flask) -> Celery:
 def init_flask_app() -> Flask:
     flask_app = Flask(__name__)
     flask_app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+    flask_app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
     ...
 
     init_celery_app(flask_app)
