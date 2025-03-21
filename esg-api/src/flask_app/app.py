@@ -337,7 +337,8 @@ def run_task():
     logger.info("params:", request.form)
     try:
         document_id = request.form["document_id"]
-        s3_url = request.form["url"]
+        s3_url = request.form["document_url"]
+        callback_url = request.form["callback_url"]
         response = requests.get(s3_url)
         pdf_path = f"{WS_PATH}/document_{document_id}"
         os.makedirs(pdf_path, exist_ok=True)
@@ -350,6 +351,6 @@ def run_task():
         return json_response({"status": "error", "msg": str(ex)})
     else:
         # à ce point, les erreurs sont gérées par la tâche Celery
-        tasks.analyser.delay(document_id, pdf_path)
+        tasks.analyser.delay(document_id, pdf_path, callback_url)
 
         return json_response({"status": "en attente"})

@@ -26,9 +26,6 @@ MODEL_FILE_PATH = MODEL_PATH + MODEL_NAME
 CURRENT_DEVICE = "cpu"
 MODELS = []
 
-# Endpoint de l'application Portail RSE 
-APP_BASE_URL = os.getenv("APP_BASE_URL")
-
 # Flask & Celery
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # < 100 MB
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
