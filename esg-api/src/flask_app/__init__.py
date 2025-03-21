@@ -26,9 +26,6 @@ MODEL_FILE_PATH = MODEL_PATH + MODEL_NAME
 CURRENT_DEVICE = "cpu"
 MODELS = []
 
-# Endpoint de l'application Portail RSE
-APP_BASE_URL = os.getenv("APP_BASE_URL")
-
 # Pour la gestion des tokens JWT
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 

@@ -18,7 +18,6 @@ from flask_app import (
     REPO_NAME,
     TEXT_FILE_NAME_CSV,
     TEXT_FILE_NAME_PKL,
-    APP_BASE_URL,
     init_flask_app,
 )
 from helpers.extract import ExtractTexts
@@ -35,9 +34,8 @@ def make_status(document_id: str, status: str, **kwargs) -> dict:
     return dict(document_id=document_id, status=status) | kwargs
 
 
-def notify_app(status: dict):
+def notify_app(callback_url: str, status: dict):
     # appelle l'URL de callbach avec le statut d'avancement actuel
-    callback_url = f"{APP_BASE_URL}/ESRS-predict/{status['document_id']}"
     
     logger.debug(f"URL de notification : {callback_url}")
     logger.debug(f"contenu de la notification : {status}")
@@ -242,8 +240,8 @@ def sendpredsfile(pdf_key, pdf_path) -> dict:
 
 @shared_task(ignore_result=False)
 @celery_exception_handler
-def analyser(document_id, pdf_path):
-    notify_app(make_status(document_id, "processing"))
+def analyser(document_id, pdf_path, callback_url):
+    notify_app(callback_url, make_status(document_id, "processing"))
 
     STEPS = [
         ["vérification du pdf", check_pdf_in_path],
@@ -254,7 +252,7 @@ def analyser(document_id, pdf_path):
     for step_label, function in STEPS:
         logger.info(f"{step_label} : document:{document_id}, path={pdf_path}")
         notification = function(document_id, pdf_path)
-        notify_app(notification)
+        notify_app(callback_url, notification)
         if notification["status"] == "error":
             logger.info(f"erreur, arrêt du traitement pour {document_id}")
             return
