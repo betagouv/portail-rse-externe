@@ -35,7 +35,7 @@ def make_status(document_id: str, status: str, **kwargs) -> dict:
 
 
 def notify_app(callback_url: str, status: dict):
-    # appelle l'URL de callbach avec le statut d'avancement actuel
+    # appelle l'URL de callback avec le statut d'avancement actuel
     
     logger.debug(f"URL de notification : {callback_url}")
     logger.debug(f"contenu de la notification : {status}")
