@@ -65,4 +65,4 @@ def run_task():
         # à ce point, les erreurs sont gérées par la tâche Celery
         tasks.analyser.delay(document_id, pdf_path, callback_url)
 
-        return jsonify({"status": "en attente"})
+        return jsonify({"status": "pending"})
