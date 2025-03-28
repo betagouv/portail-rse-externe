@@ -627,6 +627,20 @@ wheels = [
 ]
 
 [[package]]
+name = "flasgger"
+version = "0.9.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flask" },
+    { name = "jsonschema" },
+    { name = "mistune" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8a/e4/05e80adeadc39f171b51bd29b24a6d9838127f3aaa1b07c1501e662a8cee/flasgger-0.9.7.1.tar.gz", hash = "sha256:ca098e10bfbb12f047acc6299cc70a33851943a746e550d86e65e60d4df245fb", size = 3979409 }
+
+[[package]]
 name = "flask"
 version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1882,6 +1896,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "flasgger" },
     { name = "flower" },
     { name = "jupyterlab" },
     { name = "ruff" },
@@ -1905,6 +1920,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "flasgger", specifier = ">=0.9.7.1" },
     { name = "flower", specifier = ">=2.0.1" },
     { name = "jupyterlab", specifier = ">=4.3.5" },
     { name = "ruff", specifier = ">=0.9.8" },

@@ -21,6 +21,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "flasgger>=0.9.7.1",
     "flower>=2.0.1",
     "jupyterlab>=4.3.5",
     "ruff>=0.9.8",

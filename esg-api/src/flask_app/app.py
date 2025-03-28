@@ -16,6 +16,7 @@ import os
 import requests
 from flask import request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required
+from flasgger import Swagger
 
 import flask_app.tasks as tasks
 
@@ -27,9 +28,9 @@ from flask_app import (
 
 # Flask components
 app = init_flask_app()
+swagger = Swagger(app)
 jwt = JWTManager(app)
 logger = logging.getLogger(__name__)
-
 
 def _fetch_s3_document(url: str, document_id: str) -> str:
     response = requests.get(url)
@@ -43,15 +44,45 @@ def _fetch_s3_document(url: str, document_id: str) -> str:
 
     return pdf_path
 
-
 @app.route("/ping", methods=["GET"])
 def ping():
+    """
+    Vérifie si le serveur est en fonctionnement
+    ---
+    responses:
+      200:
+        description: Le serveur est en fonctionnement
+    """
     return jsonify({"status": "alive", "msg": "API is alive and well"})
-
 
 @app.route("/run-task", methods=["POST"])
 @jwt_required(skip_revocation_check=True, verify_type=False)
 def run_task():
+    """
+    Exécute une tâche
+    ---
+    parameters:
+      - name: document_id
+        in: formData
+        type: string
+        required: true
+        description: L'ID du document
+      - name: document_url
+        in: formData
+        type: string
+        required: true
+        description: L'URL du document
+      - name: callback_url
+        in: formData
+        type: string
+        required: true
+        description: L'URL de rappel
+    responses:
+      200:
+        description: La tâche a été démarrée avec succès
+      400:
+        description: Données de tâche invalides
+    """
     logger.info("params:", request.form)
     try:
         document_id = request.form["document_id"]

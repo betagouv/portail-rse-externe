@@ -36,6 +36,16 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:63
 
 logger = logging.getLogger(__name__)
 
+# Swagger
+SWAGGER_CONFIG = {
+    "title": "API de détection de contexte ESRS",
+    "description": """
+    Cette API permet de détecter, extraire et classifier le contenu par ESRS dans un document français au format PDF. 
+    """,
+    "version": "1.0.0",
+    "uiversion": 3,
+}
+
 
 def init_celery_app(flask_app: Flask) -> Celery:
     class _Task(Task):
@@ -61,6 +71,7 @@ def init_flask_app() -> Flask:
     flask_app = Flask(__name__)
     flask_app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
     flask_app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
+    flask_app.config["SWAGGER"] = SWAGGER_CONFIG
     ...
 
     init_celery_app(flask_app)
