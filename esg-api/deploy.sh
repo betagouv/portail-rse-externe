@@ -11,7 +11,7 @@ echo "🛑 Arrêt de l'ancien conteneur"
 podman-compose down
 
 echo "🧱 Reconstruction de l'image et lancement du nouveau conteneur"
-podman-compose up -d --remove-orphans 
+podman-compose up --build --remove-orphans -d 
 
 echo "🧹 Nettoyage des anciennes images"
 podman image prune -f
