@@ -2,7 +2,6 @@ version: '3'
 
 tasks:
   flask: flask --app flask_app.app run --reload --debug
-  uwsgi: uwsgi --ini uwsgi.ini --protocol http 
   gunicorn: gunicorn --bind localhost:44444 flask_app.app:app 
   format: ruff format 
   lint: ruff check 
