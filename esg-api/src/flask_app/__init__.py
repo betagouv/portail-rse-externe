@@ -45,7 +45,8 @@ SWAGGER_CONFIG = {
     "version": "1.0.0",
     "uiversion": 3,
 }
-
+# Liste des adresses IP autorisées pour accéder à /apidocs
+SWAGGER_ALLOWED_IPS = ["127.0.0.1", "::1"]
 
 def init_celery_app(flask_app: Flask) -> Celery:
     class _Task(Task):
