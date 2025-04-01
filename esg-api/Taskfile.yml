@@ -9,3 +9,4 @@ tasks:
   fix: ruff check --fix
   celery: celery -A flask_app.tasks worker --loglevel=info --pool=threads
   dev: honcho start --procfile Procfile.dev
+  token: python -m helpers.token  
