@@ -14,7 +14,7 @@ import logging
 import os
 
 import requests
-from flask import request, jsonify
+from flask import abort, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required
 from flasgger import Swagger
 
@@ -23,14 +23,17 @@ import flask_app.tasks as tasks
 # voir :__init__.py
 from flask_app import (
     WS_PATH,
+    SWAGGER_ALLOWED_IPS,
     init_flask_app,
 )
+
 
 # Flask components
 app = init_flask_app()
 swagger = Swagger(app)
 jwt = JWTManager(app)
 logger = logging.getLogger(__name__)
+
 
 def _fetch_s3_document(url: str, document_id: str) -> str:
     response = requests.get(url)
@@ -44,6 +47,13 @@ def _fetch_s3_document(url: str, document_id: str) -> str:
 
     return pdf_path
 
+
+@app.before_request
+def limit_apidocs_access():
+    if request.path == "/apidocs" and request.remote_addr not in SWAGGER_ALLOWED_IPS:
+        abort(403)
+
+
 @app.route("/ping", methods=["GET"])
 def ping():
     """
@@ -54,6 +64,7 @@ def ping():
         description: Le serveur est en fonctionnement
     """
     return jsonify({"status": "alive", "msg": "API is alive and well"})
+
 
 @app.route("/run-task", methods=["POST"])
 @jwt_required(skip_revocation_check=True, verify_type=False)
