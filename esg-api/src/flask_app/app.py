@@ -22,15 +22,16 @@ import flask_app.tasks as tasks
 
 # voir :__init__.py
 from flask_app import (
+    FLASK_ENV,
     WS_PATH,
-    SWAGGER_ALLOWED_IPS,
     init_flask_app,
 )
 
 
 # Flask components
 app = init_flask_app()
-swagger = Swagger(app)
+if FLASK_ENV != "production":
+    swagger = Swagger(app)
 jwt = JWTManager(app)
 logger = logging.getLogger(__name__)
 
@@ -46,12 +47,6 @@ def _fetch_s3_document(url: str, document_id: str) -> str:
         f.write(response.content)
 
     return pdf_path
-
-
-@app.before_request
-def limit_apidocs_access():
-    if request.path == "/apidocs" and request.remote_addr not in SWAGGER_ALLOWED_IPS:
-        abort(403)
 
 
 @app.route("/ping", methods=["GET"])

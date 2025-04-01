@@ -34,6 +34,9 @@ MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # < 100 MB
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
+# Environnement courant
+FLASK_ENV = os.getenv("FLASK_ENV", "production")
+
 logger = logging.getLogger(__name__)
 
 # Swagger
