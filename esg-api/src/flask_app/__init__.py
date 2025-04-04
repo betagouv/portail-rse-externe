@@ -13,7 +13,7 @@ TEXT_FILE_NAME_CSV = "texts_file.csv"
 PRED_FILE_NAME_JSON = "esrs_preds.json"
 
 # HuggingFace model name and repo name
-MODEL_NAME = "distill-camembert-esrs-v1"
+MODEL_NAME = "camembert-base-esrs-v1"
 REPO_NAME = "Franbul/" + MODEL_NAME
 
 # Workspace directory
