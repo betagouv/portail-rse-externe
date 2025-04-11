@@ -45,9 +45,3 @@ Execute à la fois les commandes de lancement des workers Celery et de l'applica
 ```
 task dev
 ```
-
-### Utiliser le notebook
-
-```
-jupyter notebook esg-api/notebook/detect_api_in_jupyter.ipynb
-```
