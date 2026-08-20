@@ -14,7 +14,7 @@ import logging
 import os
 
 import requests
-from flask import abort, request, jsonify
+from flask import request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required
 from flasgger import Swagger
 
