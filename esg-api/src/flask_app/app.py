@@ -97,7 +97,7 @@ def run_task():
         pdf_path = _fetch_s3_document(s3_url, document_id)
     except Exception as ex:
         logger.exception(ex)
-        return jsonify({"status": "error", "msg": str(ex)})
+        return jsonify({"status": "error", "msg": "Erreur lors de l'envoi"})
     else:
         # à ce point, les erreurs sont gérées par la tâche Celery
         tasks.analyser.delay(document_id, pdf_path, callback_url)
