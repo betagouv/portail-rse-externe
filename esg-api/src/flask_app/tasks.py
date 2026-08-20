@@ -168,6 +168,12 @@ def pdf2txt(pdf_key, pdf_path) -> dict:
 
             # Return OK and the number of texts
             nbtexts = pd_res_filter.shape[0]
+        else:
+            return make_status(
+                pdf_key,
+                "error",
+                msg="Aucune phrase trouvée dans le PDF",
+            )
     except Exception as e:
         msg_utilisateur = "Erreur lors de l’extraction des phrases à analyser"
         msg = f"{msg_utilisateur} : {e}"
