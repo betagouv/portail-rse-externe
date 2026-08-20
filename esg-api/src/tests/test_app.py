@@ -21,13 +21,13 @@ def test_ping(client):
 @patch("flask_jwt_extended.view_decorators.verify_jwt_in_request")
 @patch("flask_app.app.tasks.analyser.delay")
 @patch("flask_app.app._fetch_s3_document")
-def test_run_task(mock_fetch_s3_document, mock_delay, mock_verify_jwt, client):
+def test_run_task_v1_par_defaut(mock_fetch_s3_document, mock_delay, mock_verify_jwt, client):
     mock_fetch_s3_document.return_value = "./workspace/document_1"
 
     response = client.post(
         "/run-task",
         data={
-            "document_id": "1",
+            "document_id": "42",
             "document_url": "https://example.com/fichier.pdf",
             "callback_url": "https://example.com/callback",
         },
@@ -35,8 +35,8 @@ def test_run_task(mock_fetch_s3_document, mock_delay, mock_verify_jwt, client):
 
     assert response.status_code == 200
     assert response.get_json() == {"status": "pending"}
-    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "1")
-    mock_delay.assert_called_once_with("1", "./workspace/document_1", "https://example.com/callback")
+    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "42")
+    mock_delay.assert_called_once_with("42", "./workspace/document_1", "https://example.com/callback", "1")
 
 
 @patch("flask_jwt_extended.view_decorators.verify_jwt_in_request")
@@ -54,3 +54,24 @@ def test_run_task_requete_incorrecte(mock_fetch_s3_document, mock_delay, mock_ve
     assert response.get_json()["status"] == "error"
     assert mock_fetch_s3_document.called is False
     assert mock_delay.called is False
+
+@patch("flask_jwt_extended.view_decorators.verify_jwt_in_request")
+@patch("flask_app.app.tasks.analyser.delay")
+@patch("flask_app.app._fetch_s3_document")
+def test_run_task_v2(mock_fetch_s3_document, mock_delay, mock_verify_jwt, client):
+    mock_fetch_s3_document.return_value = "./workspace/document_1"
+
+    response = client.post(
+        "/run-task",
+        data={
+            "document_id": "1",
+            "document_url": "https://example.com/fichier.pdf",
+            "callback_url": "https://example.com/callback",
+            "ai_version": "2",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.get_json() == {"status": "pending"}
+    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "1")
+    mock_delay.assert_called_once_with("1", "./workspace/document_1", "https://example.com/callback", "2")
