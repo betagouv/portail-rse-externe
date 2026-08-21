@@ -16,3 +16,5 @@ Cette procédure est probablement temporaire, mais fonctionnelle :
 - lancer le script de déploiement : `./deploy.sh`
 - se déconnecter
 - *done*
+
+En production, les variables d'environnement sont dans le fichier `/home/podman/portail-rse-externe/esg-api/.env`.
