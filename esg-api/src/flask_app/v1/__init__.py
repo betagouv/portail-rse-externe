@@ -247,4 +247,4 @@ def analyser(document_id, pdf_path, callback_url):
     # A ce point, si pas d'erreur, on peut supprimer le dossier de travail
     remove_directory(pdf_path)
 
-    logger.info(f"fin de traitement pour le fichier {document_id} ({pdf_path})")
+    logger.info(f"fin de traitement v1 pour le fichier {document_id} ({pdf_path})")
