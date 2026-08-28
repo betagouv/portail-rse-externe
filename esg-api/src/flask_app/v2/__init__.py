@@ -2,10 +2,8 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
-from flask_app.v1 import make_status
-from flask_app.v1 import notify_app
-import json
-
+from helpers.notifications import make_status
+from helpers.notifications import notify_app
 
 from .indicators import get_indicators
 from .pipeline import ExtractionStats
