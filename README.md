@@ -49,4 +49,4 @@ task dev
 
 ## Déploiement en production
 
-Voir esg-api/README.md
+Voir doc/deploiement.md
