@@ -17,7 +17,7 @@ cd esg-api
 uv sync
 ```
 
-### Installer Taskfile 
+### Installer Taskfile
 
 Voir : [Taskfile](https://taskfile.dev) :
 
@@ -31,7 +31,8 @@ Paramétrer les variables suivantes :
 - `CELERY_RESULT_BACKEND` : endpoint pour les tâches Celery (par défaut : instance Redis locale)
 - `PYTHONPATH` : inclure le dossier `src` comme indiqué dans le fichier d'exemple pour modifier le chemin système de Python
 - `APP_BASE_URL` : le domaine de l'app django (préfixé par le protocole)
-
+- `SCW_BASE_URL` : le domaine de l'API pour le LLM nécessaire à la v2 (préfixé par le protocole)
+- `SCW_API_KEY` : la clef nécessaire pour utiliser le LLM
 
 ### Exécuter Flask
 
@@ -45,3 +46,7 @@ Execute à la fois les commandes de lancement des workers Celery et de l'applica
 ```
 task dev
 ```
+
+## Déploiement en production
+
+Voir esg-api/README.md
