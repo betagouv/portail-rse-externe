@@ -1,4 +1,7 @@
 import logging
+
+import openai
+
 from pathlib import Path
 from typing import Any, cast
 
@@ -18,8 +21,20 @@ logger = logging.getLogger(__name__)
 
 def analyser(document_id, pdf_path, callback_url):
     notify_app(callback_url, make_status(document_id, "processing"))
-    extractor = VSMExtractor(retrieval_method="count") # passer à count_refine?
-    df, stats = extractor.extract_from_pdf(pdf_path)
+    try:
+        extractor = VSMExtractor(retrieval_method="count") # passer à count_refine?
+        df, stats = extractor.extract_from_pdf(pdf_path)
+    except openai.PermissionDeniedError: # problème de connexion au LLM
+        notify_app(
+            callback_url,
+            make_status(
+                document_id,
+                "error",
+                msg="Erreur de connexion"
+            )
+        )
+        return
+
     if df is None or stats is None or stats.indicators_value_found == 0:
         # "Extraction échouée
         notify_app(
