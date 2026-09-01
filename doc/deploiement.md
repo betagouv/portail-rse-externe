@@ -55,3 +55,5 @@ CONTAINER ID  IMAGE                           COMMAND               CREATED     
 d64e4b788dbe  localhost/esg-api_flask:latest  uv run honcho sta...  16 months ago  Up 3 seconds  5000/tcp                                                                      esg-api_flask_1
 3af9b8efb18a  docker.io/library/caddy:latest  caddy run --confi...  16 months ago  Up 3 seconds  0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp, 80/tcp, 443/tcp, 443/udp, 2019/tcp  caddy
 ```
+
+Il est possible de voir les logs d'un conteneur avec `podman logs id_du_conteneur`.
