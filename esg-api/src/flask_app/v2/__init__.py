@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def analyser(document_id, pdf_path, callback_url):
-    notify_app(callback_url, make_status(document_id, "processing v2"))
+    notify_app(callback_url, make_status(document_id, "processing"))
     extractor = VSMExtractor(retrieval_method="count") # passer à count_refine?
     df, stats = extractor.extract_from_pdf(pdf_path)
     if df is None or stats is None or stats.indicators_value_found == 0:
@@ -26,7 +26,7 @@ def analyser(document_id, pdf_path, callback_url):
             callback_url,
             make_status(
                 document_id,
-                "error v2",
+                "error",
                 msg="Aucune phrase trouvée dans le PDF"
             )
         )
@@ -42,6 +42,6 @@ def analyser(document_id, pdf_path, callback_url):
     rse_map = _load_rse_mapping(rse_path)
     results = _enrich_results_with_rse(results, rse_map=rse_map)
     #payload cli.py ligne 621
-    notify_app(callback_url, make_status(document_id, "success v2", resultat_json=results))
+    notify_app(callback_url, make_status(document_id, "success", resultat_json=results))
 
     logger.info(f"fin de traitement v2 pour le fichier {document_id} ({pdf_path})")
