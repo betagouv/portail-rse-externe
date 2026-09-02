@@ -1,7 +1,6 @@
 import logging
 import os
 from pathlib import PosixPath
-import shutil
 
 import fitz
 import pandas as pd
@@ -17,6 +16,7 @@ from flask_app import (
     TEXT_FILE_NAME_CSV,
     TEXT_FILE_NAME_PKL,
 )
+from helpers.clean import remove_directory
 from helpers.extract import ExtractTexts
 from helpers.notifications import make_status
 from helpers.notifications import notify_app
@@ -46,15 +46,6 @@ def init_model():
 
     return model
 
-
-
-def remove_directory(target):
-    # suppression des fichiers de travail
-    try:
-        shutil.rmtree(target)
-        logger.info(f"Répertoire {target} supprimé avec succès.")
-    except Exception as e:
-        logger.error(f"Erreur lors de la suppression du répertoire {target}: {e}")
 
 
 def check_pdf_in_path(pdf_key, pdf_path) -> dict:

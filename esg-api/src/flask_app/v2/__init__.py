@@ -5,6 +5,7 @@ import openai
 from pathlib import Path
 from typing import Any, cast
 
+from helpers.clean import remove_directory
 from helpers.notifications import make_status
 from helpers.notifications import notify_app
 
@@ -59,5 +60,7 @@ def analyser(document_id, pdf_dir_path, callback_url):
     results = _enrich_results_with_rse(results, rse_map=rse_map)
     #payload cli.py ligne 621
     notify_app(callback_url, make_status(document_id, "success", resultat_json=results))
+
+    remove_directory(pdf_dir_path)
 
     logger.info(f"fin de traitement v2 pour le fichier {document_id} ({pdf_path})")
