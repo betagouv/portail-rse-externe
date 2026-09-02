@@ -36,9 +36,9 @@ jwt = JWTManager(app)
 logger = logging.getLogger(__name__)
 
 
-def _fetch_s3_document(url: str, document_id: str) -> str:
+def _fetch_s3_document(url: str, document_id: str, ai_version: int) -> str:
     response = requests.get(url)
-    pdf_path = f"{WS_PATH}/document_{document_id}"
+    pdf_path = f"{WS_PATH}/v{ai_version}_document_{document_id}"
     file_path = f"{pdf_path}/fichier.pdf"
 
     os.makedirs(pdf_path, exist_ok=True)
@@ -95,7 +95,7 @@ def run_task(ai_version=1):
         document_id = request.form["document_id"]
         s3_url = request.form["document_url"]
         callback_url = request.form["callback_url"]
-        pdf_path = _fetch_s3_document(s3_url, document_id)
+        pdf_path = _fetch_s3_document(s3_url, document_id, ai_version)
     except Exception as ex:
         logger.exception(ex)
         return jsonify({"status": "error", "msg": "Erreur lors de l'envoi"})

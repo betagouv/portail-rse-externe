@@ -36,7 +36,7 @@ def test_run_task_v1_par_defaut(mock_fetch_s3_document, mock_delay, mock_verify_
 
     assert response.status_code == 200
     assert response.get_json() == {"status": "pending"}
-    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "42")
+    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "42", 1)
     mock_delay.assert_called_once_with("42", "./workspace/document_1", "https://example.com/callback", 1)
 
 @patch("flask_jwt_extended.view_decorators.verify_jwt_in_request")
@@ -58,7 +58,7 @@ def test_run_task_v1(mock_fetch_s3_document, mock_delay, mock_verify_jwt, client
 
     assert response.status_code == 200
     assert response.get_json() == {"status": "pending"}
-    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "42")
+    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "42", 1)
     mock_delay.assert_called_once_with("42", "./workspace/document_1", "https://example.com/callback", 1)
 
 
@@ -96,5 +96,5 @@ def test_run_task_v2(mock_fetch_s3_document, mock_delay, mock_verify_jwt, client
 
     assert response.status_code == 200
     assert response.get_json() == {"status": "pending"}
-    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "1")
+    mock_fetch_s3_document.assert_called_once_with("https://example.com/fichier.pdf", "1", 2)
     mock_delay.assert_called_once_with("1", "./workspace/document_1", "https://example.com/callback", 2)
