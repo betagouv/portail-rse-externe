@@ -1,3 +1,4 @@
+import json
 import logging
 
 import openai
@@ -68,7 +69,8 @@ def analyser(document_id, pdf_dir_path, callback_url):
     rse_map = _load_rse_mapping(rse_path)
     results = _enrich_results_with_rse(results, rse_map=rse_map)
     #payload cli.py ligne 621
-    notify_app(callback_url, make_status(document_id, "success", resultat_json=results))
+    resultat_json = json.dumps(results)
+    notify_app(callback_url, make_status(document_id, "success", resultat_json=resultat_json))
 
     remove_directory(pdf_dir_path)
 
