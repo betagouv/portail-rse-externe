@@ -48,6 +48,15 @@ def analyser(document_id, pdf_dir_path, callback_url):
             )
         )
         return
+    else:
+        notify_app(
+            callback_url,
+            make_status(
+                document_id,
+                "processing",
+                msg="Phrases trouvées dans le PDF"
+            )
+        )
 
     results: list[dict[str, Any]] = (
                     []
