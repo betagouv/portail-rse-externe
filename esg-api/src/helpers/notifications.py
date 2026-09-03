@@ -14,11 +14,11 @@ def make_status(document_id: str, status: str, **kwargs) -> dict:
 def notify_app(callback_url: str, status: dict):
     # appelle l'URL de callback avec le statut d'avancement actuel
 
-    logger.debug(f"URL de notification : {callback_url}")
-    logger.debug(f"contenu de la notification : {status}")
+    logger.info(f"URL de notification : {callback_url}")
+    logger.info(f"contenu de la notification : {status}")
 
     result = requests.post(callback_url, status)
 
-    logger.debug(f"resultat callback : {result}")
+    logger.info(f"resultat callback : {result}")
 
     return result
