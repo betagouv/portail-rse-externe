@@ -65,7 +65,7 @@ def analyser(document_id, pdf_dir_path, callback_url):
                     else cast(list[dict[str, Any]], df.to_dict(orient="records"))
                 )
 
-    rse_path = Path("./data/table_codes_portail_rse.csv")
+    rse_path = Path(__file__).parent / "data" / "table_codes_portail_rse.csv"
     rse_map = _load_rse_mapping(rse_path)
     results = _enrich_results_with_rse(results, rse_map=rse_map)
     #payload cli.py ligne 621
