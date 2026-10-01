@@ -9,7 +9,7 @@ Cette procédure est probablement temporaire, mais fonctionnelle :
 ### Détail de la procédure de déploiement
 
 - se connecter en `ssh` au serveur (seuls les devs ont des comptes actuellement) : ` ssh nom_utilisateur@ia.portail-rse.beta.gouv.fr`
-- passer en utilisateur `podman`: `sudo -s -u podman`
+- passer en utilisateur `podman`: `sudo --login -u podman`
 - se placer dans le répertoire de l'app : `cd /home/podman/portail-rse-externe/esg-api/`
 - lancer le script de déploiement : `./deploy.sh`
 - se déconnecter
@@ -24,7 +24,7 @@ En production, les variables d'environnement sont dans le fichier `/home/podman/
 Se connecter en ssh sur la machine puis :
 
 ```
-sudo -i -u podman
+sudo --login -u podman
 podman-compose -f ~/portail-rse-externe/esg-api/docker-compose.yml stop # arreter les 3 processus
 podman-compose -f ~/portail-rse-externe/esg-api/docker-compose.yml ps # vérifier l'état
 podman-compose -f ~/portail-rse-externe/esg-api/docker-compose.yml start
