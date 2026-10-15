@@ -2,7 +2,7 @@ code_vsme;matched_rse_code;matched_rse_champs_id;matched_rse_colonne_id
 B3_1;B3-30-p1;estimation_emissions_GES;scope_1
 B3_2;B3-30-p1;estimation_emissions_GES;scope_2_localisation
 B3_3;B3-30-p2;estimation_emissions_GES_scope?;emissions_brutes_GES
-B3_4;B3-29-p2;consommation_combustible_par_type;energie
+B3_4;B3-29-p2;consommation_combustible_par_type;total
 B5_1;B5-33;sites_zones_sensibles;dans_zone_sensible
 B5_2;B5-33;sites_zones_sensibles;superficie
 B6_1;B6-35;total_prelevements_eau;
